@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:random_string/random_string.dart';
+import 'package:student_attendance_app/services/database.dart';
 
 class AddStudent extends StatefulWidget {
   const AddStudent({super.key});
@@ -11,6 +14,7 @@ class _AddStudentState extends State<AddStudent> {
   TextEditingController nameController = TextEditingController();
   TextEditingController rollNoController = TextEditingController();
   TextEditingController ageController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +25,10 @@ class _AddStudentState extends State<AddStudent> {
           children: [
             Row(
               children: [
-                Icon(Icons.arrow_back_ios),
+                GestureDetector(
+                  onTap: Get.back,
+                  child: Icon(Icons.arrow_back_ios),
+                ),
                 SizedBox(width: 30.0),
                 Text(
                   "Student ",
@@ -114,21 +121,54 @@ class _AddStudentState extends State<AddStudent> {
               ),
             ),
             SizedBox(height: 40.0),
-            Center(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 10.0),
-                width: 150,
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Text(
-                    "Submit",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24.0,
+            GestureDetector(
+              onTap: () async {
+                if (nameController.text != "" &&
+                    rollNoController.text != "" &&
+                    ageController.text != "") {
+                  String addID = randomAlphaNumeric(10);
+                  Map<String, dynamic> studentInfoMap = {
+                    "Name": nameController.text,
+                    "RollNo": rollNoController.text,
+                    "Age": ageController.text,
+                    "Present": false,
+                    "Absent": false,
+                  };
+                  await DatabaseMethods()
+                      .addStudent(studentInfoMap, addID)
+                      .then((value) {
+                        nameController.text = "";
+                        rollNoController.text = "";
+                        ageController.text = "";
+                        Get.snackbar(
+                          "Success",
+                          "Student Data Uploaded",
+                          backgroundColor: Colors.green,
+                          snackPosition: SnackPosition.BOTTOM,
+                          colorText: Colors.white,
+                          borderRadius: 10,
+                          margin: EdgeInsets.all(20),
+                          snackStyle: SnackStyle.FLOATING,
+                        );
+                      });
+                }
+              },
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 10.0),
+                  width: 150,
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Submit",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24.0,
+                      ),
                     ),
                   ),
                 ),
